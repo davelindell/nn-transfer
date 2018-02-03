@@ -5,7 +5,7 @@ _WEIGHT_KEYS += [key+':0' for key in _WEIGHT_KEYS]
 
 
 def state_dict_layer_names(state_dict):
-    layer_names = [".".join(k.split('.')[:-1]) for k in state_dict.keys()]
+    layer_names = ["_".join(k.split('_')[:-1]) for k in state_dict.keys()]
     # Order preserving unique set of names
     return list(OrderedDict.fromkeys(layer_names))
 

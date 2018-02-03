@@ -5,6 +5,7 @@ import numpy as np
 import h5py
 import keras
 import torch
+import collections
 
 from . import util
 
@@ -109,7 +110,20 @@ def pytorch_to_keras(pytorch_model, keras_model,
 
     keras_model.save('temp.h5')
     input_state_dict = pytorch_model.state_dict()
+
+    # replace all '.' keys with '_'
+    new_state_dict = {}
+    keys = input_state_dict.keys()
+    for i, k in enumerate(keys):
+        new_k = k.replace('.','_')
+        new_state_dict.update({new_k: input_state_dict[k]})
+
+    new_state_dict = collections.OrderedDict(new_state_dict)
+    input_state_dict = new_state_dict
+    print(input_state_dict.keys())
+
     pytorch_layer_names = util.state_dict_layer_names(input_state_dict)
+    print(pytorch_layer_names)
 
     with h5py.File('temp.h5', 'a') as f:
         model_weights = f['model_weights']
@@ -123,10 +137,10 @@ def pytorch_to_keras(pytorch_model, keras_model,
 
             params = util.dig_to_params(model_weights[layer])
 
-            weight_key = layer + '.weight'
-            bias_key = layer + '.bias'
-            running_mean_key = layer + '.running_mean'
-            running_var_key = layer + '.running_var'
+            weight_key = layer + '_weight'
+            bias_key = layer + '_bias'
+            running_mean_key = layer + '_running_mean'
+            running_var_key = layer + '_running_var'
 
             # Load weights (or other learned parameters)
             if weight_key in input_state_dict:
